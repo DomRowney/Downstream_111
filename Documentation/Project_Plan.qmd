@@ -1,0 +1,230 @@
+---
+title: "Downstream 111 - Project Design"
+execute:
+  echo: false
+format:
+    html:
+        page-layout: full
+        toc: true
+        embed-resources: true
+        code-fold: true
+        code-tools: true
+---
+
+::: {.callout-note}
+*This is an optional template to help you think through and record some key pieces of information around your HSMA project*
+:::
+
+
+-----------------
+
+
+# About You
+
+### Name
+
+Dominic Rowney
+
+### Organisation
+
+North of England Commissioning Support Unit (NECSU)
+
+### Role
+
+Principle Information Analyst
+
+-----------------
+
+# Project Overview
+
+### Preliminary Project Title
+
+::: {.callout-note appearance="minimal"}
+*Try to summarise the key elements of the project in under 50 words*
+:::
+111 Downstream Forecasting
+
+### Problem Statement
+
+::: {.callout-note appearance="minimal"}
+*Explain the problem or area of interest that you are trying to address*
+:::
+
+There is an existing UEC webapp that takes in values from various APIs and supplies the values to strategic and operational decision makers across various areas. In the North East there is 111 call data that comes in weekly that is patient level and has things like disposition / complaint / time, this is linkable to other datasets to allow to outcome such as admission post attending A&E. 
+
+![Example of 111 outcomes, from existing PowerBI Dashboard](system_flow_example.png)
+
+There is also a near live feed which gives 5-15 minute values for the (cumulative) number of 111 calls in a day Project Aim To develop a model that based on incoming 111 calls predicts the likely place, time and volume of downstream activity due to these calls.
+
+Key stakeholder really likes the idea of weather data being included as a factor.
+
+### Proposed Project Outputs
+
+::: {.callout-note appearance="minimal"}
+*e.g. reports, simulation model, interactive user interface/web app*
+:::
+
+-   A secure API that allows users to pass cumulative daily 111 figures and receive downstream predictions of likely activity by location, time and type
+
+### Key Techniques
+
+::: {.callout-note appearance="minimal"}
+*e.g. DES, Geographic Modelling, Mapping, Machine Learning, NLP, RAP*
+:::
+
+Specific techniques to be decided, but to be investigated are:
+
+-   ML
+-   Forecasting
+-   DES
+-   Others
+
+### What would success look like in this project?
+
+-   People would use the outputs to inform their strategic decision making
+-   Having a stable model that could be easily adapted to other regions with the similar data flows
+
+### How will you validate the conclusions of your project?
+
+-   Validate the model using cross-validation techniques and test sets from the actual responses.
+-   Ask key stakeholders whether the outputs of the model are useful for decision making
+
+### Key Project Steps
+
+::: {.callout-note appearance="minimal"}
+*Think about the key phases and elements of your project design. You can go into as much or as little detail at this stage.*
+:::
+
+-   Make a better plan
+-   Set up Git repo
+-   Contact stakeholders
+-   Initial data exploration
+-   Talk to mentors about which methods are best to try first
+-   Try to replicate elements from Richard Pilbery's papers
+-   Build a model that predicts outcomes of 111 calls
+-   Build a model that forecast outcomes of 111 calls
+-   Choose a sensible prediction window
+-   Descide on final method
+-   Look at places and platforms to host API
+-   Build API
+-   Investigate possiblity of including weather data
+-   Investigate possiblity of including event data
+
+### Any Other Comments
+
+There is the possiblity of extending this project to also look or including 999 data flows
+
+-----------------
+
+# Data
+
+### Data Requirements
+
+::: {.callout-note appearance="minimal"}
+*Think about the likely data that you are going to require to be able to undertake your project*
+:::
+
+Core data:
+
+-   111 mimimum dataset for North East Ambulance Service
+-   Faster SUS A&E and inpatient
+-   UEC 111 real-time data
+
+Additional:
+
+-   Holiday or event calendars
+-   Historic weather data
+-   Weather forecasts
+-   Primary care activity data
+
+### Data Existence
+
+::: {.callout-note appearance="minimal"}
+*Does the data you require already exist, or will you need to collect some or all of it? The data largely exists, although will need collation and standardisation.*
+:::
+
+It largerly exists. The core data is already linked, but might not be in the best location for this project
+
+### Data Access
+
+::: {.callout-note appearance="minimal"}
+*Is this data you already have access to or anticipate being able to easily access? e.g. analyst in role with data warehouse access*
+:::
+
+I should already have access to the core data. It may need moving, see [Challenges and Mitigations].
+
+For the primary care activity data it is unlikely that I will get access.
+
+Weather data requires invesitgation. There are APIs available.
+
+### Data Quality
+
+::: {.callout-note appearance="minimal"}
+*Are there any data quality issues that you are aware of at this stage*
+:::
+
+The UEC app data is no consistently on UTC, sometimes the data is submitted as BST but with a UTC format. This makes the
+
+There are some missing data for 111 UEC app, when data feeds went down.
+
+-----------------
+
+# Ethics
+
+### Does your project involve the use of machine learning to influence the care of individual patients?
+
+::: {.callout-warning}
+*If the answer to this is yes, please pause and approach Dan or Sammi for a chat*
+:::
+
+No
+
+### Can you foresee any ethical concerns or general risks of harm arising from your use of data and technology in this project?
+
+::: {.callout-note appearance="minimal"}
+*Make a note of how you would address these in the [Challenges and Mitigations] section*
+:::
+
+Yes
+
+### Have you altered your project design from your initial idea to avoid running into ethical issues?
+
+No
+
+-----------------
+
+# Challenges and Mitigations
+
+
+| Challenge | Description | Proposed Mitigations |
+|-----------|-------------|----------------------|
+|Crystal Ball | Descion makers will take the results of the forecast as truth|Educate and make sure that uncertainty is built into results displayed. This will mean that operational descions will not be made with too much reliance on the model |
+|Method   | Unsure which method to use | Talk to Dan/Sammi/Peers/Mentors to get opinions. Try multiple methods to see which one is best |
+|Preduction Window| Stakeholders are not clear what a useful window of forecast is| Examin results as we go, loot at published data, and see how long the effects of any 111 call are likely to be|
+|Weather data| The APIs and historic data looks confusing | Leave it until later and drop if necessary|
+|Data size | The volume of available data might be too large | Use samples of data, and look into using secure remote enviornments to handle larger datasets once code developed |
+
+
+-----------------
+
+# Relevant Literature
+
+::: {.callout-note appearance="minimal"}
+*Relevant Literature or Previous Projects*
+
+*If you have come across any projects (HSMA or otherwise) or scientific papers that relate to your area of interest, make a note of them here*
+:::
+
+| What | Description | Link |
+|------|-------------|------|
+|Paper  |Modelling NHS England 111 demand for primary care services: a discrete event simulation |[Link](https://doi.org/10.1136/bmjopen-2023-076203)
+|Paper |An analysis of NHS 111 demand for primary care services: A retrospective cohort study |[Link](https://doi.org/10.1371/journal.pone.0300193)|
+|HSMA Project |#6008 modelling 111 vs gp impact on ed |[Slack](https://hsma-workspace.slack.com/archives/C07RAU4M3ND)|
+|HSMA Project |#6020 modelling 111 option 2 call centre |[Slack](https://hsma-workspace.slack.com/archives/C07SN0GALN4)|
+
+
+-----------------
+
+# Comments from Programme Staff
+
+*None*
