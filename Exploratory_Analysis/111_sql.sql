@@ -27,7 +27,14 @@ SELECT
 ,	d.[Weekday_Name]
 ,	CAST(d.[Week_Start] AS DATE) AS [Week_Start]
 ,	d.[Fin_Year] AS [Financial Year]
-
+,	CASE WHEN d.[Bank_Holiday_Desc] IS NULL THEN 'No' ELSE 'Yes' END AS [Bank Holiday]
+,	ISNULL(r.[In_Out_Hours],
+		CASE
+			WHEN d.[Weekday_Name] IN ('Saturday','Sunday') THEN  'Out of Hours'
+			WHEN d.[Bank_Holiday_Desc] IS NOT NULL THEN  'Out of Hours'
+			WHEN DATEPART(HOUR, r.[Start Date]) BETWEEN 08 AND 17 THEN  'In Hours'
+			ELSE 'Out of Hours'
+			END) AS [In_Out_Hours]
 ,	CASE 
 		WHEN r.[Report Post Code CCG Text] IN ('NHS County Durham CCG'
 												,'NHS North Durham CCG'
@@ -80,13 +87,7 @@ SELECT
 ,	r.[Final Disposition Code]
 ,	CAST('Unknown' AS varchar(50))	AS [Disposition Group]
 ,	CAST('Unknown' AS varchar(100)) AS [Disposition]
-,	ISNULL(r.[In_Out_Hours],
-		CASE
-			WHEN d.[Weekday_Name] IN ('Saturday','Sunday') THEN  'Out of Hours'
-			WHEN d.[Bank_Holiday_Desc] IS NOT NULL THEN  'Out of Hours'
-			WHEN DATEPART(HOUR, r.[Start Date]) BETWEEN 08 AND 17 THEN  'In Hours'
-			ELSE 'Out of Hours'
-			END) AS [In_Out_Hours]
+
 ,	CASE WHEN [Call Taker Triage Start] IS NOT NULL	THEN 'Yes' ELSE 'No' END AS [Call_Taker_Triages]
 ,	CASE WHEN [Nurse Triage Start] IS NOT NULL		THEN 'Yes' ELSE 'No' END AS [Clinical_Triages]
 ,	r.dmicAge				AS [Patient Age]
@@ -257,6 +258,7 @@ FROM
 WHERE
 	1=1
 	AND a.[Pseudo NHSNumber] = #111_calls.[Pseudo NHS NUMBER]
+	AND ISNULL(a.[CaseClosedAt],'') != ''
 	AND ISNULL(#111_calls.[Outcome Datetime],SYSDATETIME()) >  CAST(a.[CaseStarted] AS datetime)
 	AND DATEDIFF(SECOND
                 ,#111_calls.[Call Connect Time]
