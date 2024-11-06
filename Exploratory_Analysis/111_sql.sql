@@ -80,6 +80,7 @@ SELECT
 		END AS [Sub ICB Name]
 ,	CAST('Unknown' AS varchar(max))	AS [GP Practice]
 ,	ISNULL(LEFT(r.[GP National ID],6),'Unknown')	AS [GP Practice Code]
+,	CAST(NULL AS float) AS [GP Deprivation]
 ,	CASE
 		WHEN ISNULL(r.[Symptom_Group],'') = '' THEN  'Unknown'
 		ELSE r.[Symptom_Group]
@@ -145,6 +146,19 @@ WHERE
 	1=1
 	AND [GP Practice Code] = g.[Organisation_Code]
 	AND	g.[Is_Latest] = 1;
+
+
+UPDATE #111_calls
+SET
+	[GP Deprivation] = f.[Value]
+FROM
+	[UKHF_AZURE].[NE_And_N_Cumbria_ICS_UserDB].[Fingertips_National_GP_Profiles].[Practice_Summary1] AS f
+WHERE 
+	1=1
+	AND [GP Practice Code] = f.[Area_Code] COLLATE DATABASE_DEFAULT
+	AND f.[Indicator_ID] = 93553 -- Deprivation score (IMD 2019)
+	AND f.[Time_Period] = 2019;
+
 
 ------------------------------------------------------------------
 
@@ -238,6 +252,26 @@ WHERE
 -- Urgent Care
 -- ############
 
+-- Creates lookup for UCC sites
+DROP TABLE IF EXISTS #RXP_UCC;
+CREATE TABLE #RXP_UCC 
+	(	[ods_code] varchar(5)
+	,	[site_name] varchar(250)
+	);
+INSERT INTO #RXP_UCC ([ods_code],[site_name])
+VALUES
+	 ('RXPRD','Seaham Urgent Care Centre'			   )
+	,('RXP09','Peterlee Urgent Care Centre'			   )
+	,('RXP09','Peterlee UTC'						   )
+	,('RXPCP','OOH University Hospital of North Durham')
+	,('RXPCP','Durham UTC'							   )
+	,('RXPDA','Darlington UTC'						   )
+	,('RXPDA','Darlington Out of Hours Service'		   )
+	,('RXPBA','Bishop Auckland Urgent Care Centre'	   )
+	,('RXPBA','Bishop Auckland UTC'					   )
+	,('RXP11','Shotley Bridge UTC'					   )
+	,('RXP11','OOH Shotley Bridge Urgent Care Centre'  );
+
 UPDATE #111_calls
 SET
 	[Outcome ID]		= a.[Pseudo CaseID]
@@ -251,7 +285,7 @@ SET
 							WHEN a.[num booked] = 1 THEN 'Urgent Treatment Centre'
 							ELSE 'Unknown'
 							END
-,	[Outcome Location Code] = a.[CaseClosedAt]
+--,	[Outcome Location Code] = a.[CaseClosedAt]
 ,	[Outcome Location Name] = a.[CaseClosedAt]
 FROM
 	[LocalDataNECS].[Acute].[RXP_UrgentCareCentres] AS a
@@ -267,12 +301,23 @@ WHERE
 	AND CAST(a.[CaseStarted] AS DATE) >= @StartDate
 	AND ISNULL(a.[num walkins],0) + ISNULL(a.[num booked],0) > 0;
 
+UPDATE #111_calls
+SET [Outcome Location Code] = t.[ods_code]
+FROM
+	#RXP_UCC AS u
+WHERE
+	1=1
+	AND #111_calls.[Outcome Type] = 'Urgent Treatment Centre'
+	AND #111_calls.[Outcome Location Name] = u.[site_name];
+
+DROP TABLE IF EXISTS #RXP_UCC;
 
 ------------------------------------------------------------------
 
 -- ############
 -- Derived
 -- ############
+
 
 UPDATE #111_calls
 SET [Outcome Location Name] = t.[Organisation_Name]
