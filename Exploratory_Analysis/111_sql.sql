@@ -7,7 +7,7 @@ SET NOCOUNT ON
 
 DECLARE @StartDate AS DATE
 
-SET @StartDate = 'REPLACE START DATE'
+SET @StartDate = '20240101' --'REPLACE START DATE'
 
 DROP TABLE IF EXISTS #111_calls
 
@@ -81,6 +81,7 @@ SELECT
 ,	CAST('Unknown' AS varchar(max))	AS [GP Practice]
 ,	ISNULL(LEFT(r.[GP National ID],6),'Unknown')	AS [GP Practice Code]
 ,	CAST(NULL AS float) AS [GP Deprivation]
+,	CAST(NULL AS float) AS [GP Survey Q21 Wait for Appt]
 ,	CASE
 		WHEN ISNULL(r.[Symptom_Group],'') = '' THEN  'Unknown'
 		ELSE r.[Symptom_Group]
@@ -147,7 +148,7 @@ WHERE
 	AND [GP Practice Code] = g.[Organisation_Code]
 	AND	g.[Is_Latest] = 1;
 
-
+-- GP Deprivation
 UPDATE #111_calls
 SET
 	[GP Deprivation] = f.[Value]
@@ -159,6 +160,24 @@ WHERE
 	AND f.[Indicator_ID] = 93553 -- Deprivation score (IMD 2019)
 	AND f.[Time_Period] = 2019;
 
+
+-- GP Survey
+DECLARE @SurveyDate date
+SET @SurveyDate =	(SELECT	MAX(Effective_Snapshot_Date)
+					FROM [UKHF_AZURE].[NE_And_N_Cumbria_ICS_UserDB].[GP_Patient_Survey].[Practice_Level_Weighted1]
+					WHERE [Effective_Snapshot_Date] >= '20240331') --Change in format
+
+UPDATE #111_calls
+SET
+	[GP Survey Q21 Wait for Appt] = s.[Field_Value]
+FROM
+	[UKHF_AZURE].[NE_And_N_Cumbria_ICS_UserDB].[GP_Patient_Survey].[Practice_Level_Weighted1] AS s
+WHERE
+	1=1
+	AND [GP Practice Code] = s.[Practice_Code] COLLATE DATABASE_DEFAULT
+	AND s.[Effective_Snapshot_Date] = @SurveyDate
+	AND s.[Field_Name] = 'lastgpapptwait_1.pct'
+	
 
 ------------------------------------------------------------------
 
@@ -302,7 +321,7 @@ WHERE
 	AND ISNULL(a.[num walkins],0) + ISNULL(a.[num booked],0) > 0;
 
 UPDATE #111_calls
-SET [Outcome Location Code] = t.[ods_code]
+SET [Outcome Location Code] = u.[ods_code]
 FROM
 	#RXP_UCC AS u
 WHERE
