@@ -35,3 +35,25 @@ def Pregnancy_Detect(x):
 def replace_thing(data,col,x):
     data.loc[:,col] = (data[col].str.replace(x,'', regex=True))
     return data    
+
+
+## Replaces low frequency sites with 'OTHER SITE'
+def aggregate_sites(x):
+    keep_sites = [  'No UEC Contact'
+                ,'UNIVERSITY HOSPITAL OF NORTH TEES'
+                ,'THE ROYAL VICTORIA INFIRMARY'
+                ,'NORTHUMBRIA SPECIALIST EMERGENCY CARE HOSPITAL'
+                ,'UNIVERSITY HOSPITAL OF NORTH DURHAM'
+                ,'THE JAMES COOK UNIVERSITY HOSPITAL'
+                ,'SUNDERLAND ROYAL HOSPITAL'
+                ,'QUEEN ELIZABETH HOSPITAL'
+                ,'DARLINGTON MEMORIAL HOSPITAL'
+                ,'UNIVERSITY HOSPITAL OF HARTLEPOOL'
+                ,'SOUTH TYNESIDE DISTRICT HOSPITAL'
+                ,'WANSBECK HOSPITAL'
+                ,'REDCAR PRIMARY CARE HOSPITAL'
+                ]
+    if x in keep_sites:
+        return x
+    else:
+        return 'OTHER SITE'
