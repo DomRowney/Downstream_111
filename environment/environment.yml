@@ -33,3 +33,4 @@ dependencies:
     - statsmodels>=0.11.1
     - routingpy>=1.3.0
     - tensorflow==2.16.1
+    - scikit-survival>=0.23.1
